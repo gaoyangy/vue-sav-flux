@@ -1,0 +1,27 @@
+{
+  "name": "sav-vue-flux",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rollup.config.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.js"
+  },
+  "keywords": [],
+  "author": "gaoyangyang",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.23.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "rollup": "^0.36.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^5.0.5",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-vue": "^2.4.2"
+  },
+  "dependencies": {
+    "sav-flux": "0.0.20",
+    "vue": "^2.5.3",
+    "vue-router": "^3.0.1",
+    "vue-template-compiler": "^2.5.3"
+  }
+}
