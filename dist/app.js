@@ -224,6 +224,21 @@ function clone(val) {
   return extend(true, [], [val])[0];
 }
 
+/**
+ * 对象或数组遍历
+ * @param  {Array|Object} obj      要遍历的对象
+ * @param  {Function} iterator 遍历函数，统一遵循值在前的模式
+ * @param  {Mixed} context  上下文对象
+ * @return {Mixed}          返回要遍历的对象
+ *
+ * @example
+ * each(['a','b'], function(val, key){
+ *     if (val == 'a') {
+ *         console.log(val);
+ *         return false;
+ *     }
+ * });
+ */
 function prop(target, key, value) {
   if (isObject(key)) {
     for (let name in key) {
@@ -338,34 +353,18 @@ let promise = {
   }
 };
 
-/**
- * Camelize a hyphen-delmited string.
- */
 const camelCaseRE = /[-_](\w)/g;
 function camelCase(str) {
   return lcfirst(str.replace(camelCaseRE, (_, c) => c ? c.toUpperCase() : ''));
 }
 
 /**
- * UnCapitalize a string.
+ * Capitalize a string.
  */
 function lcfirst(str) {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
-/**
- * ajax 方法
- * @param  {Object}   opts 请求对象
- * {
- *     method:"GET",
- *     dataType:"JSON",
- *     headers:{},
- *     url:"",
- *     data:{},
- * }
- * @param  {Function} next 回调
- * @return {XMLHttpRequest}        xhr对象
- */
 function ajax(opts, next) {
   let method = (opts.method || 'GET').toUpperCase();
   let dataType = (opts.dataType || 'JSON').toUpperCase();
@@ -1338,60 +1337,66 @@ function syncBinderKeys(binder, keys) {
   binder.vms.forEach(vm => vm.update(state));
 }
 
-let _startIdx = 0;
+var state = {
+  todoList: []
+};
 
-var TodoModule = {
-  state: {
-    todoList: []
+let _startIdx = 0;
+var mutation = {
+  createNew({ state: { todoList } }, newItem) {
+    todoList.push(newItem);
+    return { todoList };
   },
-  mutations: {
-    createNew({ state: { todoList } }, newItem) {
-      todoList.push(newItem);
-      return { todoList };
-    },
-    toggleCompleted({ state: { todoList } }, todo) {
-      for (let i = 0, l = todoList.length; i < l; ++i) {
-        if (todoList[i].id == todo.id) {
-          let it = todoList[i];
-          if (it.isCompleted == todo.isCompleted) {
-            it.isCompleted = !todo.isCompleted;
-            return { todoList };
-          }
-        }
-      }
-    },
-    removeItemById({ state: { todoList } }, id) {
-      for (let i = todoList.length - 1; i >= 0; --i) {
-        if (todoList[i].id == id) {
-          todoList.splice(i, 1);
+  toggleCompleted({ state: { todoList } }, todo) {
+    for (let i = 0, l = todoList.length; i < l; ++i) {
+      if (todoList[i].id == todo.id) {
+        let it = todoList[i];
+        if (it.isCompleted == todo.isCompleted) {
+          it.isCompleted = !todo.isCompleted;
           return { todoList };
         }
       }
-    },
-    restoreItems(_, todoList) {
-      if (!Array.isArray(todoList)) {
-        todoList = [];
-      }
-      _startIdx = todoList.length;
-      return {
-        todoList
-      };
     }
   },
-  actions: {
-    createNew({ resolve, commit, dispatch }, title) {
-      let newItem = {};
-      newItem.title = title;
-      newItem.id = ++_startIdx;
-      newItem.isCompleted = false;
-      commit.createNew(newItem);
-      return dispatch.onCreateNew(newItem);
-    },
-    removeItemById({ resolve, commit, dispatch }, id) {
-      commit.removeItemById(id);
-      return dispatch.onRemoveItemById(id);
+  removeItemById({ state: { todoList } }, id) {
+    for (let i = todoList.length - 1; i >= 0; --i) {
+      if (todoList[i].id == id) {
+        todoList.splice(i, 1);
+        return { todoList };
+      }
     }
+  },
+  restoreItems(_, todoList) {
+    if (!Array.isArray(todoList)) {
+      todoList = [];
+    }
+    _startIdx = todoList.length;
+    return {
+      todoList
+    };
   }
+};
+
+let _startIdx$1 = 0;
+var action = {
+  createNew({ resolve, commit, dispatch }, title) {
+    let newItem = {};
+    newItem.title = title;
+    newItem.id = ++_startIdx$1;
+    newItem.isCompleted = false;
+    commit.createNew(newItem);
+    return dispatch.onCreateNew(newItem);
+  },
+  removeItemById({ resolve, commit, dispatch }, id) {
+    commit.removeItemById(id);
+    return dispatch.onRemoveItemById(id);
+  }
+};
+
+var TodoModule = {
+  state: state,
+  mutations: mutation,
+  actions: action
 };
 
 var Todo = { render: function () {
@@ -1416,7 +1421,6 @@ var Todo = { render: function () {
 			count: 0
 		};
 	},
-	mounted() {},
 	proxys: {
 		onCreateNew({ resolve }, item) {
 			this.count++;

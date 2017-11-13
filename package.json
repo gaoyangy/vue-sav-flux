@@ -4,7 +4,7 @@
   "description": "",
   "main": "rollup.config.js",
   "scripts": {
-    "build": "rollup -c rollup.config.js"
+    "build": "rollup -w -c rollup.config.js"
   },
   "keywords": [],
   "author": "gaoyangyang",
@@ -19,6 +19,7 @@
     "rollup-plugin-vue": "^2.4.2"
   },
   "dependencies": {
+    "rollup-watch": "^4.3.1",
     "sav-flux": "0.0.20",
     "vue": "^2.5.3",
     "vue-router": "^3.0.1",
