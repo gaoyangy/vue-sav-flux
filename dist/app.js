@@ -224,21 +224,6 @@ function clone(val) {
   return extend(true, [], [val])[0];
 }
 
-/**
- * 对象或数组遍历
- * @param  {Array|Object} obj      要遍历的对象
- * @param  {Function} iterator 遍历函数，统一遵循值在前的模式
- * @param  {Mixed} context  上下文对象
- * @return {Mixed}          返回要遍历的对象
- *
- * @example
- * each(['a','b'], function(val, key){
- *     if (val == 'a') {
- *         console.log(val);
- *         return false;
- *     }
- * });
- */
 function prop(target, key, value) {
   if (isObject(key)) {
     for (let name in key) {
@@ -353,18 +338,34 @@ let promise = {
   }
 };
 
+/**
+ * Camelize a hyphen-delmited string.
+ */
 const camelCaseRE = /[-_](\w)/g;
 function camelCase(str) {
   return lcfirst(str.replace(camelCaseRE, (_, c) => c ? c.toUpperCase() : ''));
 }
 
 /**
- * Capitalize a string.
+ * UnCapitalize a string.
  */
 function lcfirst(str) {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
+/**
+ * ajax 方法
+ * @param  {Object}   opts 请求对象
+ * {
+ *     method:"GET",
+ *     dataType:"JSON",
+ *     headers:{},
+ *     url:"",
+ *     data:{},
+ * }
+ * @param  {Function} next 回调
+ * @return {XMLHttpRequest}        xhr对象
+ */
 function ajax(opts, next) {
   let method = (opts.method || 'GET').toUpperCase();
   let dataType = (opts.dataType || 'JSON').toUpperCase();
@@ -1337,6 +1338,46 @@ function syncBinderKeys(binder, keys) {
   binder.vms.forEach(vm => vm.update(state));
 }
 
+var Todo = { render: function () {
+		var _vm = this;var _h = _vm.$createElement;var _c = _vm._self._c || _h;return _c('div', { staticClass: "todolist" }, [_c('h4', [_vm._v("TODO LIST"), _c('i', [_vm._v("(sum: " + _vm._s(_vm.count) + ")")])]), _vm._v(" "), _c('ul', _vm._l(_vm.todoList, function (child) {
+			return _c('li', [_c('label', [_c('input', { attrs: { "type": "checkbox" }, domProps: { "checked": child.isCompleted }, on: { "change": function ($event) {
+						_vm.toggleCompleted(child);
+					} } }), _vm._v(" "), _c('span', [_vm._v(_vm._s(child.title))])]), _vm._v(" "), _c('button', { on: { "click": function ($event) {
+						_vm.removeItemById(child.id);
+					} } }, [_vm._v("x")])]);
+		})), _vm._v(" "), _c('input', { directives: [{ name: "model", rawName: "v-model", value: _vm.newText, expression: "newText" }], attrs: { "type": "text" }, domProps: { "value": _vm.newText }, on: { "input": function ($event) {
+					if ($event.target.composing) {
+						return;
+					}_vm.newText = $event.target.value;
+				} } }), _vm._v(" "), _c('button', { on: { "click": function ($event) {
+					_vm.createNew(_vm.newText);
+				} } }, [_vm._v("Add")])]);
+	}, staticRenderFns: [],
+	getters: ['todoList'],
+	data: function () {
+		return {
+			newText: '',
+			count: 0
+		};
+	},
+	proxys: {
+		onCreateNew({ resolve }, item) {
+			this.count++;
+			return resolve('ok');
+		},
+		onRemoveItemById({ resolve }, item) {
+			this.count--;
+			return resolve('ok');
+		}
+	}
+};
+
+var routes = [{
+    name: "Todo",
+    path: "/",
+    component: Todo
+}];
+
 var state = {
   todoList: []
 };
@@ -1393,69 +1434,28 @@ var action = {
   }
 };
 
-var TodoModule = {
+var storeModule = {
   state: state,
   mutations: mutation,
   actions: action
 };
 
-var Todo = { render: function () {
-		var _vm = this;var _h = _vm.$createElement;var _c = _vm._self._c || _h;return _c('div', { staticClass: "todolist" }, [_c('h4', [_vm._v("TODO LIST"), _c('i', [_vm._v("(sum: " + _vm._s(_vm.count) + ")")])]), _vm._v(" "), _c('ul', _vm._l(_vm.todoList, function (child) {
-			return _c('li', [_c('label', [_c('input', { attrs: { "type": "checkbox" }, domProps: { "checked": child.isCompleted }, on: { "change": function ($event) {
-						_vm.toggleCompleted(child);
-					} } }), _vm._v(" "), _c('span', [_vm._v(_vm._s(child.title))])]), _vm._v(" "), _c('button', { on: { "click": function ($event) {
-						_vm.removeItemById(child.id);
-					} } }, [_vm._v("x")])]);
-		})), _vm._v(" "), _c('input', { directives: [{ name: "model", rawName: "v-model", value: _vm.newText, expression: "newText" }], attrs: { "type": "text" }, domProps: { "value": _vm.newText }, on: { "input": function ($event) {
-					if ($event.target.composing) {
-						return;
-					}_vm.newText = $event.target.value;
-				} } }), _vm._v(" "), _c('button', { on: { "click": function ($event) {
-					_vm.createNew(_vm.newText);
-				} } }, [_vm._v("Add")])]);
-	}, staticRenderFns: [],
-	getters: ['todoList'],
-	data: function () {
-		return {
-			newText: '',
-			count: 0
-		};
-	},
-	proxys: {
-		onCreateNew({ resolve }, item) {
-			this.count++;
-			return resolve('ok');
-		},
-		onRemoveItemById({ resolve }, item) {
-			this.count--;
-			return resolve('ok');
-		}
-	}
-};
-
 Vue.use(FluxVue);
+let router = new VueRouter({ routes });
 
 let flux = new Flux({
-  strict: true // enable this for promise action to resolve data copy
+	strict: true // enable this for promise action to resolve data copy
 });
-flux.declare(TodoModule);
-
-let router = new VueRouter({
-  routes: [{
-    name: "Todo",
-    path: "/",
-    component: Todo
-  }]
-});
+flux.declare(storeModule);
 
 let app = new Vue({
-  vaf: new FluxVue({
-    flux,
-    router,
-    mixinActions: true
-  }),
-  router,
-  el: '#app'
+	vaf: new FluxVue({
+		flux,
+		router,
+		mixinActions: true
+	}),
+	router,
+	el: '#app'
 });
 
 window.flux = flux;

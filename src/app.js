@@ -1,27 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 import {Flux, FluxVue} from 'sav-flux'
-
-import TodoModule from './todo'
+import routes from './router/index'
+import storeModule from './store/index'
 import Todo from './Todo.vue'
 
 Vue.use(FluxVue)
+let router = new VueRouter({routes})
 
 let flux = new Flux({
 	strict: true // enable this for promise action to resolve data copy
 })
-flux.declare(TodoModule)
-
-let router = new VueRouter({
-  routes: [
-    {
-      name: "Todo",
-      path: "/",
-      component: Todo
-    }
-  ]
-})
+flux.declare(storeModule)
 
 let app = new Vue({
 	vaf: new FluxVue({
